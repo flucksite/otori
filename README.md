@@ -3,7 +3,7 @@
 [![CI](https://codeberg.org/fluck/rack_honeypot/actions/workflows/ci.yml/badge.svg)](https://codeberg.org/fluck/rack_honeypot/actions?workflow=ci.yml)
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcodeberg.org%2Fapi%2Fv1%2Frepos%2Ffluck%2Frack_honeypot%2Ftags&query=%24%5B0%5D.name&label=version)](https://codeberg.org/fluck/rack_honeypot/tags)
 
-Invisible captcha spam protection for any Rack-based Ruby app, with a built-in
+Invisible captcha spam protection for any Rack-based Ruby app, with an opt-in
 Hanami adapter.
 
 This is a Ruby companion to the [Crystal lucky_honeypot
@@ -18,7 +18,7 @@ When either of the first two checks fail, the submission is quietly rejected.
 The bot thinks it succeeded and moves on. The third one can be used to reject
 or flag submissions at a chosen _human rating_ threshold.
 
-> [!Note]
+> [!NOTE]
 > The original repository is hosted at
 > [Codeberg](https://codeberg.org/fluck/rack_honeypot). The [GitHub
 > repo](https://github.com/flucksite/rack_honeypot) is just a mirror.
@@ -80,11 +80,14 @@ end
 In a form template:
 
 ```erb
-<%= raw honeypot_field("user[website]") %>
-<%= raw honeypot_signals %>
+<%= honeypot_field("user[website]") %>
+<%= honeypot_signals %>
 ```
 
-Guard the receiving action with the `honeypot` macro:
+The helpers mark their output safe via `String#html_safe`, which Hanami View
+provides out of the box, so the HTML flows through ERB without escaping.
+
+Guard the receiving action with the `honeypot` DSL method:
 
 ```ruby
 # app/actions/sign_ups/create.rb
@@ -269,18 +272,16 @@ signals.focus?
 ```
 
 > [!NOTE]
-> The human rating is the fraction of the five signals that fired, so each
-> one contributes `0.2`. A score of `0` is almost certainly a dumb bot,
-> while `0.2` could be a sophisticated bot triggering a single signal,
-> though a human filling out a short form at the top of the page may also
-> land there.
+> The human rating is the fraction of the five signals that fired, so each one
+> contributes `0.2`. A score of `0` is almost certainly a dumb bot, while `0.2`
+> could be a sophisticated bot triggering a single signal (almost always
+> `mouse`), though a human filling out a short form at the top of the page may
+> also land there.
 >
-> `0.4` is a reasonable rejection threshold: it still catches bots that
-> fake one or two signals, but avoids false positives for autofill and
-> password manager submissions, which often only trigger focus plus mouse
-> or touch. Use `0.6` as a "flag as suspicious" threshold rather than a
-> hard reject, since legitimate autofill users will frequently fall below
-> it.
+> `0.4` is a reasonable threshold for flagging entries: it still catches bots
+> that fake one or two signals, but avoids false positives for autofill and
+> password manager submissions, which often only trigger focus plus mouse or
+> touch.
 
 ## Security considerations
 
@@ -291,16 +292,16 @@ of defense.
 - Combine this with a rate limiter such as `rack-attack`.
 - For high-value forms, consider adding CAPTCHA or email verification.
 - The submission timestamp is stored in the session. If sessions are
-  compromised, an attacker could manipulate timing checks. Make sure your
-  session store uses signed and encrypted cookies.
-- The timing check compares wall-clock timestamps, which makes it resilient
-  to timing attacks since the check is a simple threshold comparison.
-- This gem does not touch CSRF tokens. Honeypot fields are regular form
-  inputs and do not interfere with your framework's CSRF protection.
+  compromised, an attacker could manipulate timing checks. Make sure your session
+  store uses signed and encrypted cookies.
+- The timing check compares wall-clock timestamps, which makes it resilient to
+  timing attacks since the check is a simple threshold comparison.
+- This gem does not touch CSRF tokens. Honeypot fields are regular form inputs
+  and do not interfere with your framework's CSRF protection.
 
-For most use cases (contact forms, newsletter signups), this gem provides
-solid protection with zero user friction. Expect it to catch between 60%
-and 90% of automated form submissions.
+For most use cases (contact forms, newsletter signups), this gem provides solid
+protection with zero user friction. Expect it to catch between 60% and 90% of
+automated form submissions.
 
 ## Development
 
