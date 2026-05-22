@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative "../rack_honeypot"
+require_relative "../otori"
 
-module RackHoneypot
+module Otori
   module Hanami
     module Action
       def self.included(base)
@@ -16,7 +16,7 @@ module RackHoneypot
           caught_block = on_caught
 
           before do |request, response|
-            next unless RackHoneypot.caught?(
+            next unless Otori.caught?(
               field_name,
               params: request.params.to_h,
               session: request.session,
@@ -35,21 +35,21 @@ module RackHoneypot
 
     module Helpers
       def honeypot_field(name, **attrs)
-        RackHoneypot.field(name, session: _rack_honeypot_session, **attrs).html_safe
+        Otori.field(name, session: _otori_session, **attrs).html_safe
       end
 
       def honeypot_signals(**attrs)
-        RackHoneypot.signals_field(**attrs).html_safe
+        Otori.signals_field(**attrs).html_safe
       end
 
       private
 
-      def _rack_honeypot_session
+      def _otori_session
         return context.request.session if respond_to?(:context) &&
                                           context.respond_to?(:request)
         return request.session if respond_to?(:request)
 
-        raise RackHoneypot::MissingSession
+        raise Otori::MissingSession
       end
     end
   end

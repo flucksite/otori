@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module RackHoneypot
+module Otori
   class Configuration
     SESSION_KEY_PREFIX = "honeypot_field"
 

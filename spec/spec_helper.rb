@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "rack_honeypot"
+require "otori"
 
 # Hanami View and ActiveSupport both define String#html_safe. Neither is loaded
 # in the gem's own test environment, so stub it minimally for the Hanami
@@ -27,6 +27,6 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 
   config.before do
-    RackHoneypot.reset_config!
+    Otori.reset_config!
   end
 end

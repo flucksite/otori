@@ -2,7 +2,7 @@
 
 require "json"
 
-module RackHoneypot
+module Otori
   class Signals
     KEYS = {
       mouse: "m",

@@ -1,10 +1,13 @@
-# RackHoneypot
+# Otori
 
-[![CI](https://codeberg.org/fluck/rack_honeypot/actions/workflows/ci.yml/badge.svg)](https://codeberg.org/fluck/rack_honeypot/actions?workflow=ci.yml)
-[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcodeberg.org%2Fapi%2Fv1%2Frepos%2Ffluck%2Frack_honeypot%2Ftags&query=%24%5B0%5D.name&label=version)](https://codeberg.org/fluck/rack_honeypot/tags)
+[![CI](https://codeberg.org/fluck/otori/actions/workflows/ci.yml/badge.svg)](https://codeberg.org/fluck/otori/actions?workflow=ci.yml)
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcodeberg.org%2Fapi%2Fv1%2Frepos%2Ffluck%2Fotori%2Ftags&query=%24%5B0%5D.name&label=version)](https://codeberg.org/fluck/otori/tags)
 
 Invisible captcha spam protection for any Rack-based Ruby app, with an opt-in
 Hanami adapter.
+
+_Otori_ (囮) is the Japanese word for "decoy", historically a bird used in
+hunting to draw others in.
 
 This is a Ruby companion to the [Crystal lucky_honeypot
 shard](https://codeberg.org/fluck/lucky_honeypot). It combines three classic
@@ -20,15 +23,15 @@ or flag submissions at a chosen _human rating_ threshold.
 
 > [!NOTE]
 > The original repository is hosted at
-> [Codeberg](https://codeberg.org/fluck/rack_honeypot). The [GitHub
-> repo](https://github.com/flucksite/rack_honeypot) is just a mirror.
+> [Codeberg](https://codeberg.org/fluck/otori). The [GitHub
+> repo](https://github.com/flucksite/otori) is just a mirror.
 
 ## Installation
 
 Add this to your Gemfile:
 
 ```ruby
-gem "rack_honeypot"
+gem "otori"
 ```
 
 Then run `bundle install`. Ruby 3.2 or newer is required.
@@ -39,9 +42,9 @@ The gem ships a framework-agnostic core plus an opt-in Hanami adapter. The core
 API is three calls:
 
 ```ruby
-RackHoneypot.field("user[website]", session: request.session)
-RackHoneypot.signals_field
-RackHoneypot.caught?("user[website]", params: request.params, session: request.session)
+Otori.field("user[website]", session: request.session)
+Otori.signals_field
+Otori.caught?("user[website]", params: request.params, session: request.session)
 ```
 
 `field` renders the invisible input and stores a load timestamp in the
@@ -61,7 +64,7 @@ honeypot looks next to the real fields, the better.
 The Hanami adapter is loaded explicitly so the base gem stays dependency-free:
 
 ```ruby
-require "rack_honeypot/hanami"
+require "otori/hanami"
 ```
 
 Mix the helpers into your views:
@@ -71,7 +74,7 @@ Mix the helpers into your views:
 module MyApp
   module Views
     module Helpers
-      include RackHoneypot::Hanami::Helpers
+      include Otori::Hanami::Helpers
     end
   end
 end
@@ -95,7 +98,7 @@ module MyApp
   module Actions
     module SignUps
       class Create < MyApp::Action
-        include RackHoneypot::Hanami::Action
+        include Otori::Hanami::Action
 
         honeypot "user[website]"
 
@@ -131,7 +134,7 @@ To act on the input-signals rating, evaluate it inside `handle`:
 
 ```ruby
 def handle(request, response)
-  rating = RackHoneypot.signals_rating(request.params.to_h)
+  rating = Otori.signals_rating(request.params.to_h)
   halt 204 if rating < 0.4
 
   # ...
@@ -143,7 +146,7 @@ end
 There is no adapter to require, the core API is enough. In a Sinatra app:
 
 ```ruby
-require "rack_honeypot"
+require "otori"
 
 enable :sessions
 
@@ -152,7 +155,7 @@ get "/sign_up" do
 end
 
 post "/sign_up" do
-  halt 204 if RackHoneypot.caught?(
+  halt 204 if Otori.caught?(
     "user[website]",
     params: params,
     session: session
@@ -165,8 +168,8 @@ end
 In the view:
 
 ```erb
-<%= RackHoneypot.field("user[website]", session: session) %>
-<%= RackHoneypot.signals_field %>
+<%= Otori.field("user[website]", session: session) %>
+<%= Otori.signals_field %>
 ```
 
 ### Rails
@@ -179,11 +182,11 @@ if you want the input-signals rating on top.
 # app/helpers/application_helper.rb
 module ApplicationHelper
   def honeypot_field(name, **attrs)
-    RackHoneypot.field(name, session: session, **attrs).html_safe
+    Otori.field(name, session: session, **attrs).html_safe
   end
 
   def honeypot_signals(**attrs)
-    RackHoneypot.signals_field(**attrs).html_safe
+    Otori.signals_field(**attrs).html_safe
   end
 end
 ```
@@ -200,7 +203,7 @@ class SignUpsController < ApplicationController
   private
 
   def check_honeypot
-    return unless RackHoneypot.caught?(
+    return unless Otori.caught?(
       "user[website]",
       params: params.to_unsafe_h,
       session: session
@@ -214,7 +217,7 @@ end
 ## Configuration
 
 ```ruby
-RackHoneypot.configure do |c|
+Otori.configure do |c|
   # Required delay (in seconds) between page load and form submission.
   c.default_delay = 2.0
 
@@ -233,7 +236,7 @@ it out of the visual flow without breaking accessibility tools. Pass your own
 `class` (or `style`) to opt out of the default style and use your CSS instead:
 
 ```ruby
-RackHoneypot.field("user[website]", session: session, class: "visually-hidden")
+Otori.field("user[website]", session: session, class: "visually-hidden")
 ```
 
 Underscored attribute keys are converted to dashes so `data_foo: "bar"`
@@ -256,13 +259,13 @@ along with the rest of the form.
 In the action, get the rating directly from the params:
 
 ```ruby
-RackHoneypot.signals_rating(params)        # => 0.0 to 1.0
+Otori.signals_rating(params)        # => 0.0 to 1.0
 ```
 
 Or work with the parsed object for more detail:
 
 ```ruby
-signals = RackHoneypot::Signals.from_json(params["honeypot_signals"])
+signals = Otori::Signals.from_json(params["honeypot_signals"])
 signals.human_rating  # 0 (bot) to 1 (human)
 signals.mouse?
 signals.touch?

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe RackHoneypot::Validator do
+RSpec.describe Otori::Validator do
   describe ".filled?" do
     it "is false for nil" do
       expect(described_class.filled?(nil)).to be(false)
@@ -37,7 +37,7 @@ RSpec.describe RackHoneypot::Validator do
     end
 
     it "is true when disable_delay is set" do
-      RackHoneypot.config.disable_delay = true
+      Otori.config.disable_delay = true
       expect(described_class.elapsed?(nil, 2.0, now: now)).to be(true)
     end
   end

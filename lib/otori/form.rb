@@ -4,7 +4,7 @@ require "cgi"
 
 require_relative "validator"
 
-module RackHoneypot
+module Otori
   module Form
     extend self
 
@@ -27,7 +27,7 @@ module RackHoneypot
     def field(name, session:, **attrs)
       raise MissingSession unless session_like?(session)
 
-      session[RackHoneypot.config.session_key(name)] = Validator.monotonic_ms.to_s
+      session[Otori.config.session_key(name)] = Validator.monotonic_ms.to_s
 
       base = {
         name: name.to_s,
@@ -43,7 +43,7 @@ module RackHoneypot
 
     def signals_field(**attrs)
       input = tag(:input, {
-        name: RackHoneypot.config.signals_input_name,
+        name: Otori.config.signals_input_name,
         type: "hidden"
       }.merge(stringify_keys(attrs)))
 

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "rack_honeypot/hanami"
+require "otori/hanami"
 
-RSpec.describe RackHoneypot::Hanami do
-  describe RackHoneypot::Hanami::Action do
+RSpec.describe Otori::Hanami do
+  describe Otori::Hanami::Action do
     let(:action_base) do
       Class.new do
         class << self
@@ -40,11 +40,11 @@ RSpec.describe RackHoneypot::Hanami do
     let(:params) { {} }
 
     it "halts with 204 when the field is filled" do
-      action_class = Class.new(action_base) { include RackHoneypot::Hanami::Action }
+      action_class = Class.new(action_base) { include Otori::Hanami::Action }
       action_class.honeypot("note")
 
-      session[RackHoneypot.config.session_key("note")] =
-        (RackHoneypot::Validator.monotonic_ms - 3_000).to_s
+      session[Otori.config.session_key("note")] =
+        (Otori::Validator.monotonic_ms - 3_000).to_s
       params["note"] = "spam"
 
       action = action_class.new
@@ -55,11 +55,11 @@ RSpec.describe RackHoneypot::Hanami do
     end
 
     it "proceeds when the form is valid" do
-      action_class = Class.new(action_base) { include RackHoneypot::Hanami::Action }
+      action_class = Class.new(action_base) { include Otori::Hanami::Action }
       action_class.honeypot("note")
 
-      session[RackHoneypot.config.session_key("note")] =
-        (RackHoneypot::Validator.monotonic_ms - 3_000).to_s
+      session[Otori.config.session_key("note")] =
+        (Otori::Validator.monotonic_ms - 3_000).to_s
 
       action = action_class.new
       result = action.call(request, response)
@@ -70,7 +70,7 @@ RSpec.describe RackHoneypot::Hanami do
 
     it "invokes the supplied block when caught" do
       called_with = nil
-      action_class = Class.new(action_base) { include RackHoneypot::Hanami::Action }
+      action_class = Class.new(action_base) { include Otori::Hanami::Action }
       action_class.honeypot("note") do |req, _res|
         called_with = req
         halt 303
@@ -85,11 +85,11 @@ RSpec.describe RackHoneypot::Hanami do
     end
 
     it "honors a custom wait" do
-      action_class = Class.new(action_base) { include RackHoneypot::Hanami::Action }
+      action_class = Class.new(action_base) { include Otori::Hanami::Action }
       action_class.honeypot("note", wait: 10)
 
-      session[RackHoneypot.config.session_key("note")] =
-        (RackHoneypot::Validator.monotonic_ms - 3_000).to_s
+      session[Otori.config.session_key("note")] =
+        (Otori::Validator.monotonic_ms - 3_000).to_s
 
       action = action_class.new
       action.call(request, response)
@@ -98,10 +98,10 @@ RSpec.describe RackHoneypot::Hanami do
     end
   end
 
-  describe RackHoneypot::Hanami::Helpers do
+  describe Otori::Hanami::Helpers do
     let(:view_class) do
       Class.new do
-        include RackHoneypot::Hanami::Helpers
+        include Otori::Hanami::Helpers
 
         attr_reader :request
 
@@ -119,7 +119,7 @@ RSpec.describe RackHoneypot::Hanami do
       html = view.honeypot_field("note")
 
       expect(html).to include('name="note"')
-      expect(session[RackHoneypot.config.session_key("note")]).to match(/\A\d+\z/)
+      expect(session[Otori.config.session_key("note")]).to match(/\A\d+\z/)
     end
 
     it "renders the signals field" do

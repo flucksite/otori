@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "lib/rack_honeypot/version"
+require_relative "lib/otori/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "rack_honeypot"
-  spec.version = RackHoneypot::VERSION
+  spec.name = "otori"
+  spec.version = Otori::VERSION
   spec.authors = ["Wout"]
   spec.email = ["hi@wout.codes"]
 
@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
     framework-agnostic gem, with an opt-in Hanami adapter. Ruby companion to
     the Crystal lucky_honeypot shard.
   DESC
-  spec.homepage = "https://codeberg.org/fluck/rack_honeypot"
+  spec.homepage = "https://codeberg.org/fluck/otori"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2"
 

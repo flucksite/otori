@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe RackHoneypot::Configuration do
+RSpec.describe Otori::Configuration do
   describe "#session_key" do
     it "prefixes the field name" do
       expect(subject.session_key("note")).to eq("honeypot_field_note")

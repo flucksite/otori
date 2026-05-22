@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe RackHoneypot::Signals do
+RSpec.describe Otori::Signals do
   describe ".from_json" do
     it "parses each signal key" do
       json = '{"m":true,"t":false,"s":true,"k":false,"f":true}'

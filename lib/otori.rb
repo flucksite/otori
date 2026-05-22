@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require_relative "rack_honeypot/version"
-require_relative "rack_honeypot/error"
-require_relative "rack_honeypot/configuration"
-require_relative "rack_honeypot/signals"
-require_relative "rack_honeypot/validator"
-require_relative "rack_honeypot/form"
+require_relative "otori/version"
+require_relative "otori/error"
+require_relative "otori/configuration"
+require_relative "otori/signals"
+require_relative "otori/validator"
+require_relative "otori/form"
 
-module RackHoneypot
+module Otori
   class << self
     def config
       @config ||= Configuration.new
