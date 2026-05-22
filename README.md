@@ -35,8 +35,8 @@ Then run `bundle install`. Ruby 3.2 or newer is required.
 
 ## Quickstart
 
-The gem ships a framework-agnostic core plus an opt-in Hanami adapter. The
-core API is three calls:
+The gem ships a framework-agnostic core plus an opt-in Hanami adapter. The core
+API is three calls:
 
 ```ruby
 RackHoneypot.field("user[website]", session: request.session)
