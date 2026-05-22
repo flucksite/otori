@@ -2,6 +2,15 @@
 
 require "rack_honeypot"
 
+# Hanami View and ActiveSupport both define String#html_safe. Neither is loaded
+# in the gem's own test environment, so stub it minimally for the Hanami
+# adapter specs.
+unless String.method_defined?(:html_safe)
+  class String
+    def html_safe = self
+  end
+end
+
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true

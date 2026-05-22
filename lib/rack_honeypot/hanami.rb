@@ -35,11 +35,11 @@ module RackHoneypot
 
     module Helpers
       def honeypot_field(name, **attrs)
-        RackHoneypot.field(name, session: _rack_honeypot_session, **attrs)
+        RackHoneypot.field(name, session: _rack_honeypot_session, **attrs).html_safe
       end
 
       def honeypot_signals(**attrs)
-        RackHoneypot.signals_field(**attrs)
+        RackHoneypot.signals_field(**attrs).html_safe
       end
 
       private
