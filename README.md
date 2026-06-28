@@ -3,8 +3,11 @@
 [![CI](https://codeberg.org/fluck/otori/actions/workflows/ci.yml/badge.svg)](https://codeberg.org/fluck/otori/actions?workflow=ci.yml)
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcodeberg.org%2Fapi%2Fv1%2Frepos%2Ffluck%2Fotori%2Ftags&query=%24%5B0%5D.name&label=version)](https://codeberg.org/fluck/otori/tags)
 
-Invisible captcha spam protection for any Rack-based Ruby app, with an opt-in
-Hanami adapter.
+Invisible honeypot spam protection for Hanami, Sinatra, Roda, Rails, and any
+other Rack-based Ruby app. Think of it as a framework-agnostic
+[invisible_captcha](https://github.com/markets/invisible_captcha) with a
+first-class Hanami adapter and an extra layer of JavaScript-based input
+detection.
 
 _Otori_ (囮) is the Japanese word for "decoy", historically a bird used in
 hunting to draw others in.
@@ -25,6 +28,29 @@ or flag submissions at a chosen _human rating_ threshold.
 > The original repository is hosted at
 > [Codeberg](https://codeberg.org/fluck/otori). The [GitHub
 > repo](https://github.com/flucksite/otori) is just a mirror.
+
+## How it compares
+
+### otori
+
+- Frameworks: Hanami, Sinatra, Roda, Rails, any Rack app
+- Hidden field + timing check + JS input signals
+- Active (new in 2026)
+
+### [invisible_captcha](https://github.com/markets/invisible_captcha)
+
+- Frameworks: Rails only
+- Hidden field + timing check
+- Actively maintained
+
+### [rack-honeypot](https://github.com/sunlightlabs/rack-honeypot)
+
+- Frameworks: any Rack app
+- Hidden field only
+- Dormant since 2016
+
+If you're on Rails and don't need the JS signals layer, `invisible_captcha` is
+the more battle-tested choice. Otori exists for everything else.
 
 ## Installation
 
