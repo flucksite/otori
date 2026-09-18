@@ -200,45 +200,53 @@ In the view:
 
 ### Rails
 
-Rails is well served by [invisible_captcha](https://github.com/markets/invisible_captcha)
-when all you need is a hidden field and a timing check. Use this gem in Rails
-if you want the input-signals rating on top.
+Load the Rails adapter from your Gemfile so the Railtie auto-hooks the
+controller macros and view helpers:
 
 ```ruby
-# app/helpers/application_helper.rb
-module ApplicationHelper
-  def honeypot_field(name, **attrs)
-    Otori.field(name, session: session, **attrs).html_safe
-  end
-
-  def honeypot_signals(**attrs)
-    Otori.signals_field(**attrs).html_safe
-  end
-end
+gem "otori", require: "otori/rails"
 ```
 
+In a form template:
+
+```erb
+<%= honeypot_field("user[website]") %>
+<%= honeypot_signals %>
+```
+
+Guard the receiving action with the `honeypot` class macro:
+
 ```ruby
-# app/controllers/sign_ups_controller.rb
 class SignUpsController < ApplicationController
-  before_action :check_honeypot, only: :create
+  honeypot :website, wait: 2, only: :create
 
   def create
     # ...
   end
-
-  private
-
-  def check_honeypot
-    return unless Otori.caught?(
-      "user[website]",
-      params: params.to_unsafe_h,
-      session: session
-    )
-
-    head :no_content
-  end
 end
 ```
+
+When the honeypot is tripped, the request halts with `:no_content` by default.
+To customize the response, pass a block:
+
+```ruby
+honeypot :website, only: :create do
+  redirect_to root_path, notice: "Moving on..."
+end
+```
+
+To act on the input-signals rating inside the action:
+
+```ruby
+def create
+  rating = Otori.signals_rating(params)
+  # weight into your own scoring, or reject below a threshold
+end
+```
+
+The adapter is a thin wrapper over the framework-agnostic core; if you prefer
+to wire it up manually, `Otori.caught?` and `Otori.field` still work fine
+inside a `before_action` and a helper method.
 
 ## Configuration
 
