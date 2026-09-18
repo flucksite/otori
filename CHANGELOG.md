@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-17
+
+### Added
+
+- `Otori::Rails`, an optional adapter for Rails apps. Provides a
+  `honeypot` controller class macro that registers a `before_action`
+  (halting with `:no_content` by default, or running a user-supplied
+  block), and a `honeypot_field` / `honeypot_signals` view-helper pair.
+  Loaded via `require "otori/rails"`; auto-hooks via a Railtie when
+  present.
+
+## [0.1.0] - 2026-05-22
+
 ### Added
 
 - Initial scaffolding inspired by the
