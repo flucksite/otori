@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-12
+
+### Changed
+
+- `signals_field` now accepts an `id:` attribute. When omitted, a unique id
+  of the form `otori-signals-<hex>` is generated per call so multiple
+  signals fields can safely coexist on the same page.
+
+### Fixed
+
+- `signals_field` no longer relies on
+  `document.currentScript.previousElementSibling` to locate its hidden input.
+  The input now carries a unique `id` and the tracking script looks it up via
+  `document.getElementById`. The previous approach broke when any DOM mutation
+  (Turbo cache restoration, injected elements, browser extensions) landed
+  between the input and the script, which could cause the signals JSON to be
+  written into a neighbouring field (such as a honeypot) and trigger false
+  positives. Callers can supply their own `id:` to override the generated
+  value, and the script now bails out silently when the input or its form
+  cannot be resolved.
+
 ## [0.2.0] - 2026-09-17
 
 ### Added
