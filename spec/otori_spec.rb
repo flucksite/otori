@@ -87,6 +87,28 @@ RSpec.describe Otori do
       html = Otori.signals_field
       expect(html).to include('name="signals"')
     end
+
+    it "generates a unique id and references it from the script" do
+      html = Otori.signals_field
+      id = html[/id="(otori-signals-[^"]+)"/, 1]
+
+      expect(id).to match(/\Aotori-signals-[a-f0-9]{12}\z/)
+      expect(html).to include(%(getElementById("#{id}")))
+    end
+
+    it "generates a different id on each call" do
+      first = Otori.signals_field[/id="([^"]+)"/, 1]
+      second = Otori.signals_field[/id="([^"]+)"/, 1]
+
+      expect(first).not_to eq(second)
+    end
+
+    it "lets callers override the id and threads it through the script" do
+      html = Otori.signals_field(id: "my-signals")
+
+      expect(html).to include('id="my-signals"')
+      expect(html).to include('getElementById("my-signals")')
+    end
   end
 
   describe ".caught?" do

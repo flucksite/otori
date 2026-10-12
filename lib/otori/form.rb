@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "cgi"
+require "securerandom"
 
 require_relative "validator"
 
@@ -9,20 +10,6 @@ module Otori
     extend self
 
     HIDDEN_STYLE = "position:absolute;left:-9999px;width:1px;height:1px;pointer-events:none;"
-
-    SIGNALS_SCRIPT = <<~JS
-      (() => {
-        const s = { m: false, t: false, s: false, k: false, f: false };
-        const input = document.currentScript.previousElementSibling;
-        const form = input.form;
-        form.addEventListener('mousemove', () => s.m = true, { once: true });
-        form.addEventListener('touchstart', () => s.t = true, { once: true });
-        form.addEventListener('keydown', () => s.k = true, { once: true });
-        form.addEventListener('focusin', () => s.f = true, { once: true });
-        window.addEventListener('scroll', () => s.s = true, { once: true });
-        form.addEventListener('submit', () => input.value = JSON.stringify(s));
-      })();
-    JS
 
     def field(name, session:, **attrs)
       raise MissingSession unless session_like?(session)
@@ -42,15 +29,40 @@ module Otori
     end
 
     def signals_field(**attrs)
-      input = tag(:input, {
-        name: Otori.config.signals_input_name,
-        type: "hidden"
-      }.merge(stringify_keys(attrs)))
+      stringified = stringify_keys(attrs)
+      id = stringified["id"] || generate_signals_id
 
-      "#{input}<script>#{SIGNALS_SCRIPT}</script>"
+      input = tag(:input, {
+        "id" => id,
+        "name" => Otori.config.signals_input_name,
+        "type" => "hidden"
+      }.merge(stringified))
+
+      "#{input}<script>#{signals_script(id)}</script>"
     end
 
     private
+
+    def generate_signals_id
+      "otori-signals-#{SecureRandom.hex(6)}"
+    end
+
+    def signals_script(id)
+      <<~JS
+        (() => {
+          const input = document.getElementById(#{id.to_json});
+          if (!input || !input.form) return;
+          const form = input.form;
+          const s = { m: false, t: false, s: false, k: false, f: false };
+          form.addEventListener('mousemove', () => s.m = true, { once: true });
+          form.addEventListener('touchstart', () => s.t = true, { once: true });
+          form.addEventListener('keydown', () => s.k = true, { once: true });
+          form.addEventListener('focusin', () => s.f = true, { once: true });
+          window.addEventListener('scroll', () => s.s = true, { once: true });
+          form.addEventListener('submit', () => input.value = JSON.stringify(s));
+        })();
+      JS
+    end
 
     def session_like?(object)
       object.respond_to?(:[]) && object.respond_to?(:[]=)
