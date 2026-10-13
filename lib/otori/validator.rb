@@ -10,6 +10,7 @@ module Otori
 
     def elapsed?(timestamp_ms, wait_seconds, now: monotonic_ms)
       return true if Otori.config.disable_delay
+      return true if wait_seconds == false
       return false if timestamp_ms.nil?
 
       (now - timestamp_ms.to_i) >= (wait_seconds.to_f * 1000)

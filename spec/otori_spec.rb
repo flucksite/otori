@@ -166,6 +166,22 @@ RSpec.describe Otori do
       end
     end
 
+    context "when wait is explicitly false" do
+      it "skips the timing check for an empty field" do
+        result = Otori.caught?(
+          "note", params: {"note" => ""}, session: session, wait: false
+        )
+        expect(result).to be(false)
+      end
+
+      it "still catches a filled honeypot field" do
+        result = Otori.caught?(
+          "note", params: {"note" => "spam"}, session: session, wait: false
+        )
+        expect(result).to be(true)
+      end
+    end
+
     it "accepts symbol param keys" do
       session[key] = (Otori::Validator.monotonic_ms - 3_000).to_s
       result = Otori.caught?("note", params: {note: ""}, session: session)
@@ -246,6 +262,22 @@ RSpec.describe Otori do
       result = Otori.reason("note", params: {"note" => ""}, session: session)
 
       expect(result).to be_nil
+    end
+
+    it "skips the timing check when wait is false" do
+      result = Otori.reason(
+        "note", params: {"note" => ""}, session: session, wait: false
+      )
+
+      expect(result).to be_nil
+    end
+
+    it "still returns :filled when wait is false and the field has a value" do
+      result = Otori.reason(
+        "note", params: {"note" => "spam"}, session: session, wait: false
+      )
+
+      expect(result).to eq(:filled)
     end
   end
 

@@ -35,7 +35,7 @@ module Otori
     end
 
     def reason(name, params:, session:, wait: nil)
-      wait ||= config.default_delay
+      wait = config.default_delay if wait.nil?
       session_key = config.session_key(name)
       stored = session_get(session, session_key)
       filled = Validator.filled?(param_value(params, name))
