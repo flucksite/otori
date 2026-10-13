@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-13
+
+### Added
+
+- Passing `wait: false` to `Otori.reason` / `Otori.caught?` (and the
+  Rails/Hanami `honeypot` macros) skips the timing check entirely while
+  keeping the filled-field check active. Useful for forms where
+  password-manager autofill or sticky-session returns make even a short
+  timer prone to false positives. `wait: nil` continues to fall back to
+  `config.default_delay`; only an explicit `false` disables timing.
+
 ## [0.4.0] - 2026-10-13
 
 ### Added
