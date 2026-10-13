@@ -31,19 +31,23 @@ module Otori
     end
 
     def caught?(name, params:, session:, wait: nil)
+      !reason(name, params:, session:, wait:).nil?
+    end
+
+    def reason(name, params:, session:, wait: nil)
       wait ||= config.default_delay
       session_key = config.session_key(name)
       stored = session_get(session, session_key)
       filled = Validator.filled?(param_value(params, name))
       elapsed = Validator.elapsed?(stored&.to_i, wait)
 
-      if !filled && elapsed
-        session_delete(session, session_key)
-        false
-      else
+      caught = catch_reason(filled:, elapsed:)
+      if caught
         session[session_key] = Validator.monotonic_ms.to_s
-        true
+      else
+        session_delete(session, session_key)
       end
+      caught
     end
 
     def signals_rating(params)
@@ -54,6 +58,13 @@ module Otori
     end
 
     private
+
+    def catch_reason(filled:, elapsed:)
+      return :filled if filled
+      return :too_fast unless elapsed
+
+      nil
+    end
 
     def param_value(params, name)
       param_keys(name).reduce(params) do |scope, key|

@@ -193,6 +193,62 @@ RSpec.describe Otori do
     end
   end
 
+  describe ".reason" do
+    let(:session) { {} }
+    let(:key) { Otori.config.session_key("note") }
+
+    it "returns nil and clears the session entry on a clean submission" do
+      session[key] = (Otori::Validator.monotonic_ms - 3_000).to_s
+
+      result = Otori.reason("note", params: {"note" => ""}, session: session)
+
+      expect(result).to be_nil
+      expect(session).not_to have_key(key)
+    end
+
+    it "returns :filled when the honeypot field has a value" do
+      session[key] = (Otori::Validator.monotonic_ms - 3_000).to_s
+
+      result = Otori.reason("note", params: {"note" => "spam"}, session: session)
+
+      expect(result).to eq(:filled)
+      expect(session[key]).to match(/\A\d+\z/)
+    end
+
+    it "returns :too_fast when the form was submitted before the delay" do
+      session[key] = Otori::Validator.monotonic_ms.to_s
+
+      result = Otori.reason(
+        "note", params: {"note" => ""}, session: session, wait: 5
+      )
+
+      expect(result).to eq(:too_fast)
+    end
+
+    it "returns :too_fast when no timestamp was recorded" do
+      result = Otori.reason("note", params: {"note" => ""}, session: session)
+      expect(result).to eq(:too_fast)
+    end
+
+    it "prefers :filled when both checks would fail" do
+      session[key] = Otori::Validator.monotonic_ms.to_s
+
+      result = Otori.reason(
+        "note", params: {"note" => "spam"}, session: session, wait: 5
+      )
+
+      expect(result).to eq(:filled)
+    end
+
+    it "returns nil when delays are disabled and the field is empty" do
+      Otori.config.disable_delay = true
+
+      result = Otori.reason("note", params: {"note" => ""}, session: session)
+
+      expect(result).to be_nil
+    end
+  end
+
   describe ".signals_rating" do
     it "returns the human rating from JSON" do
       json = '{"m":true,"t":false,"s":true,"k":false,"f":true}'
