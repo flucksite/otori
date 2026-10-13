@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-13
+
+### Added
+
+- `Otori.reason` returns the specific catch reason as a symbol
+  (`:filled` when the honeypot field was filled, `:too_fast` when the
+  form was submitted before the configured delay elapsed, `nil` when the
+  submission looks clean). This lets callers distinguish genuinely
+  suspicious submissions from users who merely autofilled and submitted
+  faster than the delay allows.
+- The Rails adapter's `on_caught` block now receives the reason symbol
+  as its sole argument, so applications can log, flag, or branch on it
+  (`honeypot(:website) { |reason| ... }`). Zero-arg blocks continue to
+  work unchanged.
+- The Hanami adapter's `on_caught` block now receives the reason symbol
+  as a third argument after `request` and `response`. Two-arg blocks
+  continue to work unchanged.
+
+### Changed
+
+- `Otori.caught?` is now a thin predicate over `Otori.reason`. Its
+  return value and session side effects are unchanged.
+
 ## [0.3.0] - 2026-10-12
 
 ### Changed
