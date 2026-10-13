@@ -11,15 +11,11 @@ module Otori
         filter_options[:except] = except if except
 
         before_action(**filter_options) do
-          next unless Otori.caught?(
-            name,
-            params:,
-            session:,
-            wait:
-          )
+          reason = Otori.reason(name, params:, session:, wait:)
+          next unless reason
 
           if on_caught
-            instance_exec(&on_caught)
+            instance_exec(reason, &on_caught)
           else
             head :no_content
           end

@@ -88,6 +88,33 @@ RSpec.describe Otori::Rails do
       expect(caught).to eq([:fired])
       expect(instance.head_called).to be_nil
     end
+
+    it "yields the catch reason to the on_caught block" do
+      seen = []
+      controller_base.honeypot("note") { |reason| seen << reason }
+      block = controller_base.before_action_calls.first[:block]
+      instance = controller_base.new
+      instance.session[Otori.config.session_key("note")] =
+        (Otori::Validator.monotonic_ms - 3_000).to_s
+      instance.params[:note] = "spam"
+
+      instance.instance_exec(&block)
+
+      expect(seen).to eq([:filled])
+    end
+
+    it "yields :too_fast when the submission beats the delay" do
+      seen = []
+      controller_base.honeypot("note", wait: 5) { |reason| seen << reason }
+      block = controller_base.before_action_calls.first[:block]
+      instance = controller_base.new
+      instance.session[Otori.config.session_key("note")] =
+        Otori::Validator.monotonic_ms.to_s
+
+      instance.instance_exec(&block)
+
+      expect(seen).to eq([:too_fast])
+    end
   end
 
   describe Otori::Rails::Helpers do
