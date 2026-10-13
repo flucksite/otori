@@ -18,7 +18,8 @@ techniques into one gem:
 
 1. **Invisible fields**. Bots fill out every field, including ones hidden with CSS.
 2. **Timing checks**. Bots submit forms instantly, humans need more time.
-3. **Input signals**. Bots don't tend to trigger mouse, touch, scroll, keyboard, or focus events.
+3. **Input signals**. Bots don't tend to trigger mouse, touch, scroll,
+   keyboard, or focus events.
 
 When either of the first two checks fail, the submission is quietly rejected.
 The bot thinks it succeeded and moves on. The third one can be used to reject
@@ -77,6 +78,20 @@ Otori.caught?("user[website]", params: request.params, session: request.session)
 session. `signals_field` renders a hidden input plus the JavaScript that
 tracks human input. `caught?` checks the submitted form and returns `true`
 when the request looks like a bot.
+
+If you want to know _why_ a submission was caught (for logging, flagging,
+or scoring), use `Otori.reason`:
+
+```ruby
+Otori.reason("user[website]", params: request.params, session: request.session)
+# => :filled    when the honeypot field was filled
+# => :too_fast  when the form was submitted before the delay elapsed
+# => nil        when the submission looks clean
+```
+
+`caught?` is implemented as `!reason(...).nil?`. Both methods perform the
+same session timestamp bookkeeping, so pick one and stick with it per
+request.
 
 Field names use standard HTML bracket notation, so `"user[website]"` lives
 under `params[:user][:website]` once submitted. Flat names like `"note"` work
@@ -138,10 +153,13 @@ end
 ```
 
 When the honeypot is tripped, the action halts with `204 No Content` by
-default. To customize the response, pass a block:
+default. To customize the response, pass a block. The block optionally
+receives the catch reason (`:filled` or `:too_fast`) as a third argument,
+handy for logging or branching:
 
 ```ruby
-honeypot "user[website]" do |_request, response|
+honeypot "user[website]" do |_request, response, reason|
+  SecurityLog.record!(reason: reason)
   response.flash[:info] = "Moving on..."
   response.redirect_to "/", status: 303
 end
@@ -227,10 +245,12 @@ end
 ```
 
 When the honeypot is tripped, the request halts with `:no_content` by default.
-To customize the response, pass a block:
+To customize the response, pass a block. The block optionally receives the
+catch reason (`:filled` or `:too_fast`), handy for logging or branching:
 
 ```ruby
-honeypot :website, only: :create do
+honeypot :website, only: :create do |reason|
+  SecurityLog.record!(reason: reason)
   redirect_to root_path, notice: "Moving on..."
 end
 ```
