@@ -174,6 +174,14 @@ honeypot "note" do |_req, _res|
 end
 ```
 
+Pass `wait: false` to skip the timing check entirely while keeping the
+filled-field check active. Useful on login or password-reset forms where
+password-manager autofill routinely beats any reasonable timer:
+
+```ruby
+honeypot "user[website]", wait: false
+```
+
 To act on the input-signals rating, evaluate it inside `handle`:
 
 ```ruby
@@ -242,6 +250,14 @@ class SignUpsController < ApplicationController
     # ...
   end
 end
+```
+
+Pass `wait: false` to skip the timing check entirely while keeping the
+filled-field check active. Useful on forms where password-manager autofill
+beats any reasonable timer (login, password reset):
+
+```ruby
+honeypot :username, wait: false, only: :create
 ```
 
 When the honeypot is tripped, the request halts with `:no_content` by default.
