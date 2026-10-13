@@ -16,15 +16,16 @@ module Otori
           caught_block = on_caught
 
           before do |request, response|
-            next unless Otori.caught?(
+            reason = Otori.reason(
               field_name,
               params: request.params.to_h,
               session: request.session,
               wait: field_wait
             )
+            next unless reason
 
             if caught_block
-              instance_exec(request, response, &caught_block)
+              instance_exec(request, response, reason, &caught_block)
             else
               halt 204
             end

@@ -84,6 +84,36 @@ RSpec.describe Otori::Hanami do
       expect(action.halted_with).to eq(303)
     end
 
+    it "passes the catch reason to the block as a third argument" do
+      seen_reason = nil
+      action_class = Class.new(action_base) { include Otori::Hanami::Action }
+      action_class.honeypot("note") do |_req, _res, reason|
+        seen_reason = reason
+        halt 204
+      end
+
+      params["note"] = "spam"
+      action_class.new.call(request, response)
+
+      expect(seen_reason).to eq(:filled)
+    end
+
+    it "passes :too_fast when the submission beats the delay" do
+      seen_reason = nil
+      action_class = Class.new(action_base) { include Otori::Hanami::Action }
+      action_class.honeypot("note", wait: 5) do |_req, _res, reason|
+        seen_reason = reason
+        halt 204
+      end
+
+      session[Otori.config.session_key("note")] =
+        Otori::Validator.monotonic_ms.to_s
+
+      action_class.new.call(request, response)
+
+      expect(seen_reason).to eq(:too_fast)
+    end
+
     it "honors a custom wait" do
       action_class = Class.new(action_base) { include Otori::Hanami::Action }
       action_class.honeypot("note", wait: 10)
