@@ -356,6 +356,22 @@ signals.focus?
 > password manager submissions, which often only trigger focus plus mouse or
 > touch.
 
+### Pragmatic rating
+
+Desktop users without a touchscreen can trigger at most four of the five
+signals, capping their raw rating at `0.8`. The raw rating always stays honest,
+but if you want such submissions to count as fully human, ask for the pragmatic
+rating:
+
+```ruby
+Otori.signals_rating(params, pragmatic: true)
+signals.pragmatic_rating
+```
+
+Ratings at or below `0.4` are returned unchanged, the `0.4` to `0.8` range is
+stretched linearly to `0.4` to `1.0`, and anything `0.8` or above counts as
+fully human.
+
 ## Security considerations
 
 This gem provides basic bot protection, but it should not be your only line
