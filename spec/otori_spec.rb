@@ -284,7 +284,7 @@ RSpec.describe Otori do
   describe ".signals_rating" do
     it "returns the human rating from JSON" do
       json = '{"m":true,"t":false,"s":true,"k":false,"f":true}'
-      expect(Otori.signals_rating("honeypot_signals" => json)).to eq(0.6)
+      expect(Otori.signals_rating({"honeypot_signals" => json})).to eq(0.6)
     end
 
     it "returns 0.0 when the field is missing" do
@@ -292,7 +292,17 @@ RSpec.describe Otori do
     end
 
     it "returns 0.0 when the JSON is invalid" do
-      expect(Otori.signals_rating("honeypot_signals" => "garbage")).to eq(0.0)
+      expect(Otori.signals_rating({"honeypot_signals" => "garbage"})).to eq(0.0)
+    end
+
+    it "returns the pragmatic rating when requested" do
+      json = '{"m":true,"s":true,"k":true,"f":true}'
+      expect(Otori.signals_rating({"honeypot_signals" => json}, pragmatic: true)).to eq(1.0)
+    end
+
+    it "returns the raw rating by default" do
+      json = '{"m":true,"s":true,"k":true,"f":true}'
+      expect(Otori.signals_rating({"honeypot_signals" => json})).to eq(0.8)
     end
   end
 end

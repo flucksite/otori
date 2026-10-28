@@ -50,11 +50,15 @@ module Otori
       caught
     end
 
-    def signals_rating(params)
+    def signals_rating(params, pragmatic: false)
       raw = param_value(params, config.signals_input_name)
       return 0.0 if raw.nil? || raw.to_s.empty?
 
-      Signals.human_rating(raw.to_s)
+      if pragmatic
+        Signals.pragmatic_rating(raw.to_s)
+      else
+        Signals.human_rating(raw.to_s)
+      end
     end
 
     private

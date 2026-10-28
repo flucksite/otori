@@ -43,6 +43,41 @@ RSpec.describe Otori::Signals do
       signals = described_class.new(mouse: true, touch: true, scroll: true, keyboard: true, focus: true)
       expect(signals.human_rating).to eq(1.0)
     end
+
+    it "caps at 0.8 for a touchless but otherwise human submission" do
+      signals = described_class.new(mouse: true, scroll: true, keyboard: true, focus: true)
+      expect(signals.human_rating).to eq(0.8)
+    end
+  end
+
+  describe "#pragmatic_rating" do
+    it "returns 1.0 for a touchless but otherwise human submission" do
+      signals = described_class.new(mouse: true, scroll: true, keyboard: true, focus: true)
+      expect(signals.pragmatic_rating).to eq(1.0)
+    end
+
+    it "returns 1.0 for a fully-human submission" do
+      signals = described_class.new(mouse: true, touch: true, scroll: true, keyboard: true, focus: true)
+      expect(signals.pragmatic_rating).to eq(1.0)
+    end
+
+    it "stretches the 0.4 to 0.8 range to 0.4 to 1.0" do
+      signals = described_class.new(mouse: true, scroll: true, keyboard: true)
+      expect(signals.pragmatic_rating).to eq(0.7)
+    end
+
+    it "leaves ratings at or below 0.4 untouched" do
+      expect(described_class.new(mouse: true, focus: true).pragmatic_rating).to eq(0.4)
+      expect(described_class.new(mouse: true).pragmatic_rating).to eq(0.2)
+      expect(described_class.new.pragmatic_rating).to eq(0.0)
+    end
+  end
+
+  describe ".pragmatic_rating" do
+    it "is a convenience class method" do
+      json = '{"m":true,"s":true,"k":true,"f":true}'
+      expect(described_class.pragmatic_rating(json)).to eq(1.0)
+    end
   end
 
   describe ".human_rating" do
