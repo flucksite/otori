@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `Otori::Signals#pragmatic_rating` and `Otori.signals_rating(params,
+  pragmatic: true)`. The raw `human_rating` is unchanged and stays honest:
+  desktop users without a touchscreen can trigger at most four of the five
+  signals, capping them at `0.8`. The pragmatic rating treats `0.8` and up
+  as fully human without influencing lower ratings: values at or below `0.4`
+  are returned untouched, and the `0.4` to `0.8` range is stretched linearly
+  to `0.4` to `1.0` (so `0.6` becomes `0.7`). Opt in per call; the default
+  `Otori.signals_rating(params)` keeps returning the raw rating.
+
 ## [0.5.0] - 2026-10-13
 
 ### Added
